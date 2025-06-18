@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Scheduler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #loginForm {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        #loginForm h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], input[type="password"], input[type="date"], 
+        input[type="time"], input[type="number"], select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00d2d3, #54a0ff);
+        }
+
+        #eventSection {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+        }
+
+        .welcome-text {
+            font-size: 1.5em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        #addEventForm {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        #addEventForm h3 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .event-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .event-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .event-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .event-detail {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        .event-detail strong {
+            color: #667eea;
+        }
+
+        .event-actions {
+            text-align: right;
+        }
+
+        .priority-high {
+            border-left-color: #ff6b6b;
+        }
+
+        .priority-medium {
+            border-left-color: #feca57;
+        }
+
+        .priority-low {
+            border-left-color: #48dbfb;
+        }
+
+        .login-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #1565c0;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Event Scheduler</h1>
+        
+        <div id="loginForm">
+            <h2>Login</h2>
+            <div class="login-info">
+                Demo Credentials:<br>
+                <strong>Admin:</strong> admin / adminpass<br>
+                <strong>User:</strong> user / userpass
+            </div>
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password">
+            </div>
+            <div class="form-group">
+                <button onclick="login()" style="width: 100%;">Login</button>
+            </div>
+        </div>
+
+        <div id="eventSection" style="display:none;">
+            <div class="header-section">
+                <div class="welcome-text">Welcome, <span id="userRole"></span>!</div>
+                <button onclick="logout()" class="btn-danger">Logout</button>
+            </div>
+
+            <div id="addEventForm" style="display:none;">
+                <h3>Add New Event</h3>
+                <div class="form-row">
+                    <input type="text" id="title" placeholder="Event Title">
+                    <input type="text" id="description" placeholder="Description">
+                </div>
+                <div class="form-row">
+                    <input type="date" id="date">
+                    <input type="time" id="time">
+                </div>
+                <div class="form-row">
+                    <select id="priority">
+                        <option value="">Select Priority</option>
+                        <option value="1">High Priority</option>
+                        <option value="2">Medium Priority</option>
+                        <option value="3">Low Priority</option>
+                    </select>
+                    <input type="text" id="course" placeholder="Course">
+                </div>
+                <div class="form-row">
+                    <input type="text" id="semester" placeholder="Semester">
+                    <input type="number" id="participants" placeholder="Expected Participants" min="1">
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="addEvent()" class="btn-success">Add Event</button>
+                    <button onclick="cancelAdd()">Cancel</button>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button onclick="showAddForm()" id="showAddBtn" class="btn-success">+ Add New Event</button>
+            </div>
+
+            <h3>Scheduled Events</h3>
+            <div id="eventsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Sample users database
+        const users = {
+            'admin': { password: 'admin123', role: 'Administrator' },
+            'user': { password: 'user123', role: 'User' }
+        };
+
+        // Events storage
+        let events = [
+            {
+                id: 1,
+                title: 'Project Presentation',
+                description: 'Final project presentations for Computer Science students',
+                date: '2025-06-15',
+                time: '14:00',
+                priority: 1,
+                course: 'CS 101',
+                semester: 'Spring 2025',
+                participants: 25,
+                createdBy: 'admin'
+            },
+            {
+                id: 2,
+                title: 'Study Group Session',
+                description: 'Mathematics study group for upcoming exams',
+                date: '2025-06-10',
+                time: '16:30',
+                priority: 2,
+                course: 'MATH 201',
+                semester: 'Spring 2025',
+                participants: 15,
+                createdBy: 'user'
+            }
+        ];
+
+        let currentUser = null;
+        let nextEventId = 3;
+
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (users[username] && users[username].password === password) {
+                currentUser = { username, role: users[username].role };
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('eventSection').style.display = 'block';
+                document.getElementById('userRole').textContent = currentUser.role;
+                
+                // Show add form button only for administrators
+                if (currentUser.role === 'Administrator') {
+                    document.getElementById('showAddBtn').style.display = 'inline-block';
+                } else {
+                    document.getElementById('showAddBtn').style.display = 'none';
+                }
+                
+                displayEvents();
+            } else {
+                alert('Invalid username or password!');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('eventSection').style.display = 'none';
+            document.getElementById('addEventForm').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            clearForm();
+        }
+
+        function showAddForm() {
+            document.getElementById('addEventForm').style.display = 'block';
+            document.getElementById('showAddBtn').style.display = 'none';
+        }
+
+        function cancelAdd() {
+            document.getElementById('addEventForm').style.display = 'none';
+            document.getElementById('showAddBtn').style.display = 'inline-block';
+            clearForm();
+        }
+
+        function clearForm() {
+            document.getElementById('title').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('time').value = '';
+            document.getElementById('priority').value = '';
+            document.getElementById('course').value = '';
+            document.getElementById('semester').value = '';
+            document.getElementById('participants').value = '';
+        }
+
+        function addEvent() {
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const priority = parseInt(document.getElementById('priority').value);
+            const course = document.getElementById('course').value.trim();
+            const semester = document.getElementById('semester').value.trim();
+            const participants = parseInt(document.getElementById('participants').value);
+
+            if (!title || !date || !time || !priority) {
+                alert('Please fill in all required fields (Title, Date, Time, Priority)');
+                return;
+            }
+
+            const newEvent = {
+                id: nextEventId++,
+                title,
+                description,
+                date,
+                time,
+                priority,
+                course,
+                semester,
+                participants: participants || 0,
+                createdBy: currentUser.username
+            };
+
+            events.push(newEvent);
+            displayEvents();
+            cancelAdd();
+            alert('Event added successfully!');
+        }
+
+        function deleteEvent(eventId) {
+            if (confirm('Are you sure you want to delete this event?')) {
+                events = events.filter(event => event.id !== eventId);
+                displayEvents();
+            }
+        }
+
+        function getPriorityText(priority) {
+            switch (priority) {
+                case 1: return 'High';
+                case 2: return 'Medium';
+                case 3: return 'Low';
+                default: return 'Unknown';
+            }
+        }
+
+        function getPriorityClass(priority) {
+            switch (priority) {
+                case 1: return 'priority-high';
+                case 2: return 'priority-medium';
+                case 3: return 'priority-low';
+                default: return '';
+            }
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        function formatTime(timeStr) {
+            const [hours, minutes] = timeStr.split(':');
+            const date = new Date();
+            date.setHours(hours, minutes);
+            return date.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+        }
+
+        function displayEvents() {
+            const eventsList = document.getElementById('eventsList');
+            
+            if (events.length === 0) {
+                eventsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No events scheduled yet.</div>';
+                return;
+            }
+
+            // Sort events by date and priority
+            const sortedEvents = events.sort((a, b) => {
+                const dateA = new Date(a.date + ' ' + a.time);
+                const dateB = new Date(b.date + ' ' + b.time);
+                if (dateA.getTime() === dateB.getTime()) {
+                    return a.priority - b.priority;
+                }
+                return dateA - dateB;
+            });
+
+            eventsList.innerHTML = sortedEvents.map(event => `
+                <div class="event-card ${getPriorityClass(event.priority)}">
+                    <div class="event-title">${event.title}</div>
+                    ${event.description ? `<div style="color: #666; margin-bottom: 10px;">${event.description}</div>` : ''}
+                    <div class="event-details">
+                        <div class="event-detail">
+                            <strong>Date:</strong> ${formatDate(event.date)}
+                        </div>
+                        <div class="event-detail">
+                            <strong>Time:</strong> ${formatTime(event.time)}
+                        </div>
+                        <div class="event-detail">
+                            <strong>Priority:</strong> ${getPriorityText(event.priority)}
+                        </div>
+                        ${event.course ? `<div class="event-detail"><strong>Course:</strong> ${event.course}</div>` : ''}
+                        ${event.semester ? `<div class="event-detail"><strong>Semester:</strong> ${event.semester}</div>` : ''}
+                        ${event.participants ? `<div class="event-detail"><strong>Participants:</strong> ${event.participants}</div>` : ''}
+                        <div class="event-detail">
+                            <strong>Created by:</strong> ${event.createdBy}
+                        </div>
+                    </div>
+                    ${currentUser.role === 'Administrator' || currentUser.username === event.createdBy ? 
+                        `<div class="event-actions">
+                            <button onclick="deleteEvent(${event.id})" class="btn-danger">Delete</button>
+                        </div>` : ''
+                    }
+                </div>
+            `).join('');
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date as minimum for date input
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').min = today;
+            
+            // Allow Enter key to login
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    login();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
