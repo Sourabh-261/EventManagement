@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Scheduler</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Event Scheduler</h1>
+        
+        <div id="loginForm">
+            <h2>Login</h2>
+            <div class="login-info">
+                Demo Credentials:<br>
+                <strong>Admin:</strong> admin / adminpass<br>
+                <strong>User:</strong> user / userpass
+            </div>
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password">
+            </div>
+            <div class="form-group">
+                <button onclick="login()" style="width: 100%;">Login</button>
+            </div>
+        </div>
+
+        <div id="eventSection" style="display:none;">
+            <div class="header-section">
+                <div class="welcome-text">Welcome, <span id="userRole"></span>!</div>
+                <button onclick="logout()" class="btn-danger">Logout</button>
+            </div>
+
+            <div id="addEventForm" style="display:none;">
+                <h3>Add New Event</h3>
+                <div class="form-row">
+                    <input type="text" id="title" placeholder="Event Title">
+                    <input type="text" id="description" placeholder="Description">
+                </div>
+                <div class="form-row">
+                    <input type="date" id="date">
+                    <input type="time" id="time">
+                </div>
+                <div class="form-row">
+                    <select id="priority">
+                        <option value="">Select Priority</option>
+                        <option value="1">High Priority</option>
+                        <option value="2">Medium Priority</option>
+                        <option value="3">Low Priority</option>
+                    </select>
+                    <input type="text" id="course" placeholder="Course">
+                </div>
+                <div class="form-row">
+                    <input type="text" id="semester" placeholder="Semester">
+                    <input type="number" id="participants" placeholder="Expected Participants" min="1">
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="addEvent()" class="btn-success">Add Event</button>
+                    <button onclick="cancelAdd()">Cancel</button>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button onclick="showAddForm()" id="showAddBtn" class="btn-success">+ Add New Event</button>
+            </div>
+
+            <h3>Scheduled Events</h3>
+            <div id="eventsList"></div>
+        </div>
+    </div>
+</body>
+</html>
